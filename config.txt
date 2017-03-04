@@ -1,0 +1,33 @@
+
+Application Name
+
+dyn-updater
+
+Application Description
+
+dynamic updater for OVH account
+
+Application Key
+
+sDZmtsszPDWcSTJY
+
+Application Secret
+
+5MIlczvjwa0p7bgk1p0PuSkrBpza8Bpv
+
+
+
+GET /1.0/auth/currentCredential HTTP/1.1
+
+    Host:
+        eu.api.ovh.com
+    Accept:
+        application/json
+    X-Ovh-Application:
+        iE3vL3mgAtLZg00l
+    X-Ovh-Consumer:
+        lHe9IxrKXVf0wwtHMtefrMa2hmvxKDbD
+    X-Ovh-Signature:
+        $1$041a91e34ab5e5944d760028e926fde8d6512636
+    X-Ovh-Timestamp:
+        1488634482
