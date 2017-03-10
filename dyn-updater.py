@@ -1,8 +1,12 @@
 #!/usr/bin/env python
 # -*- encoding: utf-8 -*-
 
-import json, ovh, string, re, requests
+import json, ovh, string, re, requests, os
 from tabulate import * 
+import logging
+
+LOG_FILENAME = 'update.log'
+logging.basicConfig(format='%(asctime)s %(message)s', datefmt='%m/%d/%Y %I:%M:%S %p', filename=LOG_FILENAME, level=logging.INFO)
 
 params = {
 	"zone_name": "socketz.net",
@@ -10,13 +14,20 @@ params = {
 	"id": "" # Empty and filled later
 }
 
+abspath = os.path.abspath(__file__)
+dname = os.path.dirname(abspath)
+os.chdir(dname)
+
 try:
 	client = ovh.Client(config_file='ovh.conf')
 
 	if params['id'] == "":
 		result = client.get('/domain/zone/'+params['zone_name']+'/dynHost/record', subDomain=params['subdomain'])
 		params['id'] = str(result[0])
-		print "Record ID: "+params['id']
+		
+		msg = "Record ID: "+params['id']
+		logging.info(msg)
+		print msg
 
 	current_record = client.get('/domain/zone/'+params['zone_name']+'/dynHost/record/'+params['id'])
 
@@ -31,14 +42,23 @@ try:
 			result = client.put('/domain/zone/'+params['zone_name']+'/dynHost/record/'+params['id'], ip=ip_address, subDomain=params['subdomain'])
 
 			if result == None:
-				print "Successfully updated subdomain {0} with ip address {1}".format(params["subdomain"], ip_address)
+				msg = "Successfully updated subdomain {0} with ip address {1}".format(params["subdomain"], ip_address)
+				logging.info(msg)
+				print msg
 			else:
 				# Pretty print
-				print json.dumps(result, indent=4)
+				msg = json.dumps(result, indent=4)
+				logging.info(msg)
+				print msg
 		else:
-			print "Current ip address ({0}) for subdomain {1} are the same. Not updated.".format(ip_address, params["subdomain"])
+			msg = "Current ip address ({0}) for subdomain {1} are the same. Not updated.".format(ip_address, params["subdomain"])
+			logging.info(msg)
+			print msg
 	else:
-		print "Cannot get the current external ip"
+		msg = "Cannot get the current external ip"
+		logging.error(msg)
+		print msg
 
 except Exception, e:
+	logging.error(e)
 	print e
