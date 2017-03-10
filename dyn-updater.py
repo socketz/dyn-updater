@@ -6,7 +6,7 @@ from tabulate import *
 import logging
 
 LOG_FILENAME = 'update.log'
-logging.basicConfig(format='%(asctime)s %(message)s', datefmt='%m/%d/%Y %I:%M:%S %p', filename=LOG_FILENAME, level=logging.INFO)
+logging.basicConfig(format='%(asctime)s %(message)s', datefmt='[%d/%m/%Y %H:%M:%S %Z]', filename=LOG_FILENAME, level=logging.INFO)
 
 params = {
 	"zone_name": "socketz.net",
