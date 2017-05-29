@@ -38,16 +38,16 @@ def update_ip():
         params['zone_name'] = config.get("updater", "zone_name")
         params['subdomain'] = config.get("updater", "subdomain")
 
-        ovh_current_ip = socket.gethostbyname(params['subdomain'])
+        dns_current_ip = socket.gethostbyname(params['subdomain'])
 
         # TODO replace with custom docker IP checker
         r = requests.get("http://ifconfig.co/json")
 
         if r.status_code == 200:
             result = r.json()
-            ip_address = result["ip"]
+            ip_address = result['ip']
 
-            if ovh_current_ip != ip_address:
+            if dns_current_ip != ip_address:
 
                 if params['id'] == "":
                     result = client.get(
@@ -65,17 +65,25 @@ def update_ip():
 
                 current_record = client.get(
                     '/domain/zone/' + params['zone_name'] + '/dynHost/record/' + params['id'])
-                result = client.put('/domain/zone/' + params['zone_name'] + '/dynHost/record/' + params[
-                    'id'], ip=ip_address, subDomain=params['subdomain'])
 
-                if result == None:
-                    msg = "Successfully updated subdomain {0} with ip address {1}".format(
-                        params["subdomain"], ip_address)
-                    logging.info(msg)
-                    print(msg)
+                if current_record['ip'] != ip_address:
+                    result = client.put('/domain/zone/' + params['zone_name'] + '/dynHost/record/' + params[
+                        'id'], ip=ip_address, subDomain=params['subdomain'])
+                    
+
+                    if result == None:
+                        msg = "Successfully updated subdomain {0} with ip address {1}".format(
+                            params["subdomain"], ip_address)
+                        logging.info(msg)
+                        print(msg)
+                    else:
+                        # Pretty print
+                        msg = json.dumps(result, indent=4)
+                        logging.info(msg)
+                        print(msg)
                 else:
-                    # Pretty print
-                    msg = json.dumps(result, indent=4)
+                    msg = "Successfully updated subdomain {0} with ip address {1}. Waiting for DNS refreshing...".format(
+                            params["subdomain"], ip_address)
                     logging.info(msg)
                     print(msg)
             else:
@@ -94,10 +102,5 @@ def update_ip():
 
 
 if __name__ == '__main__':
-    if (sys.version_info > (3, 0)):
-        update_ip()
-        sys.exit(0)
-    else:
-        # Python 2 not supported
-        print("Please upgrade your python version or use virtualenv")
-        sys.exit(1)
+    update_ip()
+    sys.exit(0)
