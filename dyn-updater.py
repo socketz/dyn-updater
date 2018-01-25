@@ -15,6 +15,7 @@ import socket
 LOG_FILENAME = 'update.log'
 logging.basicConfig(format='%(asctime)s %(message)s',
                     datefmt='[%d/%m/%Y %H:%M:%S %Z]', filename=LOG_FILENAME, level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 file_config = 'ovh.conf'
 params = {
@@ -27,6 +28,8 @@ abspath = os.path.abspath(__file__)
 dname = os.path.dirname(abspath)
 os.chdir(dname)
 
+def get_external_ip():
+    pass
 
 def update_ip():
     try:
@@ -38,10 +41,11 @@ def update_ip():
         params['zone_name'] = config.get("updater", "zone_name")
         params['subdomain'] = config.get("updater", "subdomain")
 
-        dns_current_ip = socket.gethostbyname(params['subdomain'])
+        dns_current_ip = socket.gethostbyname(params['subdomain']+'.'+params['zone_name'])
 
         # TODO replace with custom docker IP checker
-        r = requests.get("http://ifconfig.co/json")
+        r = requests.get("http://ip.socketz.net/json")
+        # r = requests.get("http://ifconfig.co/json")
 
         if r.status_code == 200:
             result = r.json()
@@ -60,7 +64,7 @@ def update_ip():
                     params['id'] = str(result[0])
 
                     msg = "Record ID: " + params['id']
-                    logging.info(msg)
+                    logger.info(msg)
                     print(msg)
 
                 current_record = client.get(
@@ -70,34 +74,35 @@ def update_ip():
                     result = client.put('/domain/zone/' + params['zone_name'] + '/dynHost/record/' + params[
                         'id'], ip=ip_address, subDomain=params['subdomain'])
                     
+                    refresh = client.post('/domain/zone/' + params['zone_name'] + '/refresh')
 
                     if result == None:
                         msg = "Successfully updated subdomain {0} with ip address {1}".format(
                             params["subdomain"], ip_address)
-                        logging.info(msg)
+                        logger.info(msg)
                         print(msg)
                     else:
                         # Pretty print
                         msg = json.dumps(result, indent=4)
-                        logging.info(msg)
+                        logger.info(msg)
                         print(msg)
                 else:
                     msg = "Successfully updated subdomain {0} with ip address {1}. Waiting for DNS refreshing...".format(
                             params["subdomain"], ip_address)
-                    logging.info(msg)
+                    logger.info(msg)
                     print(msg)
             else:
-                msg = "Current ip address ({0}) for subdomain {1} are the same. Not updated.".format(
+                msg = "Current ip address ({0}) for subdomain {1} are the same. Won't update.".format(
                     ip_address, params["subdomain"])
-                logging.info(msg)
+                logger.info(msg)
                 print(msg)
         else:
             msg = "Cannot get the current external ip"
-            logging.error(msg)
+            logger.error(msg, exc_info=True)
             print(msg)
 
     except Exception as e:
-        logging.error(e)
+        logger.error(e, exc_info=True)
         print(e)
 
 
