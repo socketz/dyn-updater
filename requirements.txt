@@ -1,2 +1,4 @@
 ovh
+requests
 tabulate
+dnspython

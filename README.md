@@ -9,4 +9,8 @@ First of all, read documentation from [python-ovh](https://github.com/ovh/python
 3. Execute auth.py for request a consumer key
 4. Put your consumer key in ovh.conf
 5. Change parameters of dyn-updater.py and execute it
-6. Cron a job for dyn-updater.py and done!
+6. Cron a job task for dyn-updater.py and done!
+Example of cron:
+```bash
+*/10 * * * * /usr/bin/python /root/dyn-updater/dyn-updater.py >> /root/dyn-updater/update.log 2>&1
+```

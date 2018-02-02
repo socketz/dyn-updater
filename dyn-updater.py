@@ -11,6 +11,7 @@ import sys
 import logging
 import configparser
 import socket
+from dns import resolver
 
 LOG_FILENAME = 'update.log'
 logging.basicConfig(format='%(asctime)s %(message)s',
@@ -28,8 +29,15 @@ abspath = os.path.abspath(__file__)
 dname = os.path.dirname(abspath)
 os.chdir(dname)
 
-def get_external_ip():
-    pass
+def get_external_ip(domain):
+    res = resolver.Resolver()
+    res.nameservers = ['8.8.8.8', '8.8.4.4']
+    answers = res.query(domain)
+    response_ip = []
+    for rdata in answers:
+        print(rdata.address)
+        response_ip.append(rdata.address)
+    return response_ip
 
 def update_ip():
     try:
@@ -92,7 +100,7 @@ def update_ip():
                     logger.info(msg)
                     print(msg)
             else:
-                msg = "Current ip address ({0}) for subdomain {1} are the same. Won't update.".format(
+                msg = "Current ip address ({0}) for subdomain {1} is the same. Won't update.".format(
                     ip_address, params["subdomain"])
                 logger.info(msg)
                 print(msg)
@@ -107,5 +115,6 @@ def update_ip():
 
 
 if __name__ == '__main__':
+    #get_external_ip('home-vpn.socketz.net')
     update_ip()
     sys.exit(0)
