@@ -50,14 +50,9 @@ def update_ip():
         params['subdomain'] = config.get("updater", "subdomain")
         full_domain = params['subdomain'] + '.' + params['zone_name']
 
-        # OLD: dns_current_ip = socket.gethostbyname()
-
         dns_current_ip = get_external_ip(full_domain)
 
-        # TODO replace with custom docker IP checker
-        r = requests.get("http://ip.socketz.net/json")
-        if r.status_code != 200:
-            r = requests.get("http://ifconfig.co/json")
+        r = requests.get("http://ifconfig.co/json")
 
         if r.status_code == 200:
             result = r.json()
@@ -128,6 +123,5 @@ def update_ip():
 
 
 if __name__ == '__main__':
-    # get_external_ip('home-vpn.socketz.net')
     update_ip()
     sys.exit(0)
