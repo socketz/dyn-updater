@@ -17,6 +17,8 @@ First of all, read documentation from [python-ovh](https://github.com/ovh/python
 5. Put your consumer key in ovh.conf
 6. Create a cron task for dyn-updater.py and done! (see below)
 
+BONUS: May use config.py file for automated configuration step by step.
+
 ### Example of cron task:
 ```bash
 */10 * * * * /usr/bin/python /root/dyn-updater/dyn-updater.py >> /root/dyn-updater/update.log 2>&1

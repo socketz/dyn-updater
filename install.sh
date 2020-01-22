@@ -28,5 +28,3 @@ echo '
 	exit 0
 '
 
-
-# https://github.com/kylemanna/docker-openvpn.git
