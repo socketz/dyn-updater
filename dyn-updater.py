@@ -103,6 +103,7 @@ def update_ip():
                         logger.info(msg)
                         print(msg)
                 else:
+		    refresh_zone(client, params)
                     msg = "Successfully updated subdomain {0} with ip address {1}. Waiting for DNS refreshing...".format(
                         params["subdomain"], ip_address)
                     logger.info(msg)
