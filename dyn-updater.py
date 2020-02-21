@@ -67,15 +67,14 @@ def update_ip():
             if dns_current_ip != ip_address:
 
                 if params['id'] == "":
-                    result = client.get(
-                        '/domain/zone/' + params['zone_name'] + '/dynHost/record', subDomain=params['subdomain'])
-		    
+                    result = client.get('/domain/zone/' + params['zone_name'] + '/dynHost/record', subDomain=params['subdomain'])
+
                     if len(result) == 0:
-			result = client.post('/domain/zone/' + params['zone_name'] + '/dynHost/record', ip=ip_address, subDomain=params['subdomain'])
-			refresh_zone(client, params)
+                        result = client.post('/domain/zone/' + params['zone_name'] + '/dynHost/record', ip=ip_address, subDomain=params['subdomain'])
+                        refresh_zone(client, params)
                         msg = "Created subdomain {!s} with IP address {!s}".format(params['subdomain'], ip_address)
-			logger.info(msg)
-			print(msg)
+                        logger.info(msg)
+                        print(msg)
                         sys.exit(1)
 
                     params['id'] = str(result[0])
@@ -84,15 +83,14 @@ def update_ip():
                     logger.info(msg)
                     print(msg)
 
-                current_record = client.get(
-                    '/domain/zone/' + params['zone_name'] + '/dynHost/record/' + params['id'])
+                current_record = client.get('/domain/zone/' + params['zone_name'] + '/dynHost/record/' + params['id'])
 
                 if current_record['ip'] != ip_address:
-		    result_del = client.delete('/domain/zone/' + params['zone_name'] + '/dynHost/record/' + params['id'])
+                    result_del = client.delete('/domain/zone/' + params['zone_name'] + '/dynHost/record/' + params['id'])
                     result = client.post('/domain/zone/' + params['zone_name'] + '/dynHost/record', ip=ip_address, subDomain=params['subdomain'])
 
                     if result == None:
-			refresh_zone(client, params)
+                        refresh_zone(client, params)
                         msg = "Successfully updated subdomain {0} with ip address {1}".format(
                             params["subdomain"], ip_address)
                         logger.info(msg)
@@ -103,7 +101,7 @@ def update_ip():
                         logger.info(msg)
                         print(msg)
                 else:
-		    refresh_zone(client, params)
+                    refresh_zone(client, params)
                     msg = "Successfully updated subdomain {0} with ip address {1}. Waiting for DNS refreshing...".format(
                         params["subdomain"], ip_address)
                     logger.info(msg)
