@@ -16,7 +16,7 @@ class ConfUpdater():
     app_secret = ""  # Application secret
 
     zone_name = ""
-    sub_domain = ""
+    subdomain = ""
 
     links = {
         1: "https://eu.api.ovh.com/createApp/",
@@ -32,14 +32,14 @@ class ConfUpdater():
 
     def menu(self):
         try:
-            print ("""
-			    1. 'ovh-eu' for OVH Europe API
-			    2. 'ovh-ca' for OVH North-America API
-			    3. 'soyoustart-eu' for So you Start Europe API
-			    4. 'soyoustart-ca' for So you Start North America API
-			    5. 'kimsufi-eu' for Kimsufi Europe API
-			    6. 'kimsufi-ca' for Kimsufi North America API
-			""")
+            print("""
+                1. 'ovh-eu' for OVH Europe API
+                2. 'ovh-ca' for OVH North-America API
+                3. 'soyoustart-eu' for So you Start Europe API
+                4. 'soyoustart-ca' for So you Start North America API
+                5. 'kimsufi-eu' for Kimsufi Europe API
+                6. 'kimsufi-ca' for Kimsufi North America API
+            """)
 
             endp = input('Choose your endpoint [1]: ')
 
@@ -90,9 +90,9 @@ class ConfUpdater():
         try:
 
             self.zone_name = input('Put your zone_name (example.com): ')
-            self.sub_domain = input('Put your sub_domain (mysubdomain): ')
+            self.subdomain = input('Put your subdomain (mysubdomain): ')
 
-            print ("""
+            print("""
                 1. Request Safe RW (GET,PUT,POST) to path /* API access
                 2. Request RW (GET,PUT,POST,DELETE) to path /* API access
             """)
@@ -118,6 +118,13 @@ class ConfUpdater():
             config.set(endp, "application_key", self.app_key)
             config.set(endp, "application_secret", self.app_secret)
 
+            self.main_url = input(
+                "Main URL endpoint to get your external IP: ")
+            self.backup_url = input("Backup URL to get your extrenal IP: ")
+            config.add_section('external-ip')
+            config.set('external-ip', 'main_url', self.main_url)
+            config.set('external-ip', 'backup_url', self.backup_url)
+
             with open(self.file_config, 'w') as cf:
                 config.write(cf)
                 print("Configuration file was created.")
@@ -135,8 +142,12 @@ class ConfUpdater():
                 # Request RW (GET,PUT,POST,DELETE) to path /* API access
                 ck.add_rules(ovh.API_READ_WRITE, "/*")
 
-            # Request token
-            validation = ck.request()
+            try:
+                # Request token
+                validation = ck.request()
+            except Exception as e:
+                print("OVH Exception: ", e)
+                sys.exit(1)
 
             input("Please visit %s to authenticate and after validation success, press Enter to continue..." %
                   validation['validationUrl'])
@@ -149,11 +160,11 @@ class ConfUpdater():
             print("Writing changes to %s file..." % self.file_config)
             config = configparser.ConfigParser()
             config.read_file(open(self.file_config))
-
-            endp = config.get("default", "endpoint")
-            config.set(endp, "zone_name", self.zone_name)
-            config.set(endp, "sub_domain", self.sub_domain)
             config.set(endp, "consumer_key", validation['consumerKey'])
+
+            config.add_section("updater")
+            config.set("updater", "zone_name", self.zone_name)
+            config.set("updater", "subdomain", self.subdomain)
 
             with open(self.file_config, "w") as cf:
                 config.write(cf)

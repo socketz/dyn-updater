@@ -6,7 +6,9 @@ import string
 import re
 from tabulate import *
 
+
 try:
+    print("Giving current token status: \n")
     client = ovh.Client(config_file='ovh.conf')
 
     credentials = client.get('/me/api/credential', status='validated')
@@ -28,6 +30,13 @@ try:
         ])
     print(tabulate(table, headers=['ID', 'App Name', 'Description',
                                    'Token Creation', 'Token Expiration', 'Token Last Use']))
+    credentialId_opt = input("Do you want to delete a credentialId? [yY/nN]: ").lower()
+    if credentialId_opt == 'y':
+        credentialId = input("Put the credentialId: ")
+        delete_endp = f"/me/api/credential/{credentialId}"
+        results = client.delete(delete_endp)
+        if(results == None):
+            print("ID {!s} deleted".format(credentialId))
 
 except Exception as e:
     print(e)

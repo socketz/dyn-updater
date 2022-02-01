@@ -41,8 +41,10 @@ def get_external_ip(domain):
         response_ip.append(rdata.address)
     return response_ip
 
+
 def refresh_zone(client, params):
     result = client.post('/domain/zone/' + params['zone_name'] + '/refresh')
+
 
 def update_ip():
     try:
@@ -54,25 +56,34 @@ def update_ip():
         params['zone_name'] = config.get("updater", "zone_name")
         params['subdomain'] = config.get("updater", "subdomain")
 
-        dns_current_ip = socket.gethostbyname(params['subdomain'])
+        hostname = "{!s}.{!s}".format(params['subdomain'], params['zone_name'])
+
+        dns_current_ip = socket.gethostbyname(hostname)
+
+        main_url = config.get("external-ip", "main_url")
+        backup_url = config.get("external-ip", "backup_url")
 
         # TODO replace with custom docker IP checker
-        #r = requests.get("http://ip.socketz.net/json")
-        r = requests.get("http://ifconfig.co/json")
+        r = requests.get(main_url)
+        
+        if r.status_code != 200:
+            r = requests.get(backup_url)
 
         if r.status_code == 200:
-            result = r.json()
-            ip_address = result['ip']
+            ip_address = r.text
 
             if dns_current_ip != ip_address:
 
                 if params['id'] == "":
-                    result = client.get('/domain/zone/' + params['zone_name'] + '/dynHost/record', subDomain=params['subdomain'])
+                    result = client.get(
+                        '/domain/zone/' + params['zone_name'] + '/dynHost/record', subDomain=params['subdomain'])
 
                     if len(result) == 0:
-                        result = client.post('/domain/zone/' + params['zone_name'] + '/dynHost/record', ip=ip_address, subDomain=params['subdomain'])
+                        result = client.post(
+                            '/domain/zone/' + params['zone_name'] + '/dynHost/record', ip=ip_address, subDomain=params['subdomain'])
                         refresh_zone(client, params)
-                        msg = "Created subdomain {!s} with IP address {!s}".format(params['subdomain'], ip_address)
+                        msg = "Created subdomain {!s} with IP address {!s}".format(
+                            params['subdomain'], ip_address)
                         logger.info(msg)
                         print(msg)
                         sys.exit(1)
@@ -83,11 +94,14 @@ def update_ip():
                     logger.info(msg)
                     print(msg)
 
-                current_record = client.get('/domain/zone/' + params['zone_name'] + '/dynHost/record/' + params['id'])
+                current_record = client.get(
+                    '/domain/zone/' + params['zone_name'] + '/dynHost/record/' + params['id'])
 
                 if current_record['ip'] != ip_address:
-                    result_del = client.delete('/domain/zone/' + params['zone_name'] + '/dynHost/record/' + params['id'])
-                    result = client.post('/domain/zone/' + params['zone_name'] + '/dynHost/record', ip=ip_address, subDomain=params['subdomain'])
+                    result_del = client.delete(
+                        '/domain/zone/' + params['zone_name'] + '/dynHost/record/' + params['id'])
+                    result = client.post(
+                        '/domain/zone/' + params['zone_name'] + '/dynHost/record', ip=ip_address, subDomain=params['subdomain'])
 
                     if result == None:
                         refresh_zone(client, params)

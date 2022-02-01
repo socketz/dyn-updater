@@ -27,4 +27,3 @@ echo '
 	esac
 	exit 0
 '
-

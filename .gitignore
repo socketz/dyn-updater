@@ -145,3 +145,4 @@ GitHub.sublime-settings
 
 # Custom
 *.conf
+.vscode/sftp.json
